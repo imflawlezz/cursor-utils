@@ -52,11 +52,34 @@ Invoke installed commands through Cursor's `/` command interface.
 
 ## Requirements
 
-- [Cursor](https://cursor.com)
+- [Cursor](https://cursor.com) to invoke installed commands
+- macOS or Linux (`amd64` or `arm64`), an interactive terminal, and network
+access to GitHub to run the installer. Windows is not supported yet.
 
 ## Installation
 
-Copy the command files into Cursor's global commands directory:
+The supported installer is a standalone TUI. It does not require Go, Git, or
+Node at runtime. To build from source, see
+[installer/README.md](installer/README.md).
+
+Download the binary for your OS and architecture from the latest
+[`installer-v*`](https://github.com/imflawlezz/cursor-utils/releases) GitHub
+Release, then run it in a terminal:
+
+```bash
+chmod +x cursor_utils_installer_darwin_arm64_1-0-0
+./cursor_utils_installer_darwin_arm64_1-0-0
+```
+
+Replace `darwin_arm64` with `darwin_amd64`, `linux_arm64`, or `linux_amd64` as
+needed. The last segment is the installer version with dots replaced by
+hyphens (`1.0.0` → `1-0-0`).
+
+The installer copies tagged `commands/` files into your Cursor configuration
+directory (default `~/.cursor/commands/`) and records ownership in a manifest
+so later updates and uninstalls do not touch your own files.
+
+You can still copy files by hand if you prefer:
 
 ```bash
 mkdir -p ~/.cursor/commands
@@ -69,6 +92,7 @@ The repository does not need to live under `~/.cursor/`.
 | --- | --- |
 | Source | `cursor-utils/commands/*.md` |
 | Installed | `~/.cursor/commands/*.md` |
+| Installer manifest | `~/.cursor/.cursor-utils/manifest.json` |
 
 ## Cursor compatibility
 
@@ -101,19 +125,27 @@ Command behavior is defined by the corresponding Markdown file under
 
 ## Updating
 
-Copy the updated `commands/*.md` files into `~/.cursor/commands/` again,
-overwriting the previous copies if desired.
+Use the installer and select a newer content version. It updates only files
+listed in its manifest.
+
+To update by hand, copy the updated `commands/*.md` files into
+`~/.cursor/commands/` again, overwriting the previous copies if desired.
 
 ## Uninstalling
 
-Delete the specific Markdown files you copied into `~/.cursor/commands/`.
-Do not remove unrelated commands in that directory.
+Use the installer, select the files to remove, and choose **Remove selected**,
+or delete only the Markdown files you copied into `~/.cursor/commands/`.
+
+Do not remove unrelated commands in that directory. The installer never
+deletes the `commands` directory itself or files it does not own.
 
 ## Repository layout
 
 ```text
 cursor-utils/
-├── commands/     # Slash command Markdown files
+├── commands/             # Slash command Markdown files
+├── installer/            # Standalone TUI installer (Go)
+│   └── README.md
 ├── README.md
 ├── CHANGELOG.md
 └── LICENSE
@@ -132,7 +164,16 @@ When adding or changing a command:
 
 ## Versioning
 
-This project follows [Semantic Versioning](https://semver.org/).
+This project follows [Semantic Versioning](https://semver.org/) with two
+independent series:
+
+| What | Tag | Example |
+| --- | --- | --- |
+| Cursor content (`commands/`, …) | `vMAJOR.MINOR.PATCH` | `v0.1.0` |
+| Installer binary | `installer-vMAJOR.MINOR.PATCH` | `installer-v1.0.0` |
+
+The TUI installer only installs content tags. Tag an installer-only release as
+`installer-v1.0.0`, not `v1.0.0`.
 
 ## Changelog
 
