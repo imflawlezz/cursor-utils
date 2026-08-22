@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/imflawlezz/cursor-utils/installer/internal/platform"
 )
 
 const fileName = ".cursor-utils.json"
@@ -52,7 +54,7 @@ func Save(home string, f File) error {
 	if err := tmp.Close(); err != nil {
 		return err
 	}
-	if err := os.Rename(tmpName, path); err != nil {
+	if err := platform.ReplaceFile(tmpName, path); err != nil {
 		return fmt.Errorf("unable to save installer settings: %w", err)
 	}
 	return nil

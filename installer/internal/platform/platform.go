@@ -39,7 +39,7 @@ func Detect() (Info, error) {
 }
 
 func Supported(goos string) bool {
-	return goos == "darwin" || goos == "linux"
+	return goos == "darwin" || goos == "linux" || goos == "windows"
 }
 
 func DisplayName(goos string) string {
@@ -65,7 +65,6 @@ func DefaultDir(goos, home string) (string, bool) {
 	case "darwin", "linux":
 		return unixJoin(home, ".cursor"), true
 	case "windows":
-		// Path shape only; Supported("windows") is still false.
 		return windowsJoin(home, ".cursor"), true
 	default:
 		return "", false
@@ -81,7 +80,8 @@ func windowsJoin(home, elem string) string {
 }
 
 func nativeClean(goos, path string) string {
-	if goos == "windows" {
+	// Unix filepath.Clean would treat Windows backslashes as ordinary characters.
+	if goos == "windows" && runtime.GOOS != "windows" {
 		return path
 	}
 	return filepath.Clean(path)

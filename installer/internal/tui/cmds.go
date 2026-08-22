@@ -32,6 +32,8 @@ func openFolderCmd(dir, goos string) tea.Cmd {
 			cmd = exec.Command("open", dir)
 		case "linux":
 			cmd = exec.Command("xdg-open", dir)
+		case "windows":
+			cmd = exec.Command("explorer", dir)
 		default:
 			return openErrMsg{fmt.Errorf("opening folders is not supported on this OS")}
 		}

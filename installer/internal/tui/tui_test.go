@@ -41,12 +41,12 @@ func TestSystemScreen(t *testing.T) {
 }
 
 func TestUnsupportedOS(t *testing.T) {
-	m := testModel(platform.Info{OS: "windows", DisplayName: "Windows", Supported: false})
+	m := testModel(platform.Info{OS: "plan9", DisplayName: "Plan 9", Supported: false})
 	if m.screen != screenUnsupported {
 		t.Fatalf("screen = %v", m.screen)
 	}
 	view := m.View()
-	if !strings.Contains(view, "Windows is not yet supported") {
+	if !strings.Contains(view, "Plan 9 is not yet supported") {
 		t.Fatal(view)
 	}
 }

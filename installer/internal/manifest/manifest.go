@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/imflawlezz/cursor-utils/installer/internal/config"
+	"github.com/imflawlezz/cursor-utils/installer/internal/platform"
 )
 
 const currentFormat = config.ManifestFormatVersion
@@ -242,7 +243,7 @@ func WriteAtomic(path string, m *Manifest) error {
 	if err := tmp.Close(); err != nil {
 		return fmt.Errorf("unable to write the cursor-utils manifest: %w", err)
 	}
-	if err := os.Rename(tmpName, path); err != nil {
+	if err := platform.ReplaceFile(tmpName, path); err != nil {
 		return fmt.Errorf("unable to replace the cursor-utils manifest: %w", err)
 	}
 	cleanup = false

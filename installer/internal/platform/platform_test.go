@@ -34,11 +34,11 @@ func TestDisplayNameAndSupported(t *testing.T) {
 	if DisplayName("darwin") != "macOS" {
 		t.Fatal(DisplayName("darwin"))
 	}
-	if !Supported("darwin") || !Supported("linux") {
-		t.Fatal("darwin and linux should be supported")
+	if !Supported("darwin") || !Supported("linux") || !Supported("windows") {
+		t.Fatal("darwin, linux, and windows should be supported")
 	}
-	if Supported("windows") {
-		t.Fatal("windows is not supported yet")
+	if Supported("plan9") {
+		t.Fatal("plan9 should not be supported")
 	}
 }
 
@@ -51,7 +51,7 @@ func TestDetectRuntime(t *testing.T) {
 	if info.OS != runtime.GOOS {
 		t.Fatalf("OS = %s", info.OS)
 	}
-	if runtime.GOOS == "darwin" || runtime.GOOS == "linux" {
+	if runtime.GOOS == "darwin" || runtime.GOOS == "linux" || runtime.GOOS == "windows" {
 		if !info.Supported || !info.DefaultOK {
 			t.Fatalf("expected supported default: %+v", info)
 		}

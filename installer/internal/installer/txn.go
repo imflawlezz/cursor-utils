@@ -3,6 +3,8 @@ package installer
 import (
 	"os"
 	"path/filepath"
+
+	"github.com/imflawlezz/cursor-utils/installer/internal/platform"
 )
 
 type txnOp struct {
@@ -35,7 +37,7 @@ func (t *txn) writeFile(path string, data []byte) error {
 	if err := os.WriteFile(tmp, data, 0o644); err != nil {
 		return err
 	}
-	if err := os.Rename(tmp, path); err != nil {
+	if err := platform.ReplaceFile(tmp, path); err != nil {
 		_ = os.Remove(tmp)
 		return err
 	}
