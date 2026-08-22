@@ -12,8 +12,8 @@ Requires [Go](https://go.dev/) 1.25. `CGO_ENABLED=0`. From this directory:
 
 | Target | Output |
 | --- | --- |
-| `make build` | `dist/cursor_utils_installer_<os>_<arch>_<version>` for the host |
-| `make build-all` | darwin/linux × amd64/arm64 under `dist/` |
+| `make build` | `dist/cursor_utils_installer_<os>_<arch>_<version>` for the host (Windows adds `.exe`) |
+| `make build-all` | darwin/linux/windows × amd64/arm64 under `dist/` |
 | `make test` | unit tests |
 | `make tidy` | `go mod tidy` |
 | `make clean` | remove `dist/` |
@@ -23,7 +23,7 @@ filename become hyphens (`1.0.0` → `1-0-0`).
 
 ```bash
 make build
-./dist/cursor_utils_installer_$(go env GOOS)_$(go env GOARCH)_1-0-0
+./dist/cursor_utils_installer_$(go env GOOS)_$(go env GOARCH)_1-0-0$(go env GOEXE)
 ```
 
 Live GitHub test (optional):
@@ -47,7 +47,7 @@ Subcommands are the same regardless of the binary filename:
 ```
 
 `version` also accepts `--version` and `-v`. `help` also accepts `--help` and `-h`.
-Needs an interactive TTY. Windows is not supported yet.
+Needs an interactive TTY.
 
 ## Tags
 

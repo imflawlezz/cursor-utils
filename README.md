@@ -53,8 +53,8 @@ Invoke installed commands through Cursor's `/` command interface.
 ## Requirements
 
 - [Cursor](https://cursor.com) to invoke installed commands
-- macOS or Linux (`amd64` or `arm64`), an interactive terminal, and network
-access to GitHub to run the installer. Windows is not supported yet.
+- macOS, Linux, or Windows (`amd64` or `arm64`), an interactive terminal, and
+  network access to GitHub to run the installer
 
 ## Installation
 
@@ -71,13 +71,15 @@ chmod +x cursor_utils_installer_darwin_arm64_1-0-0
 ./cursor_utils_installer_darwin_arm64_1-0-0
 ```
 
-Replace `darwin_arm64` with `darwin_amd64`, `linux_arm64`, or `linux_amd64` as
-needed. The last segment is the installer version with dots replaced by
-hyphens (`1.0.0` → `1-0-0`).
+Windows builds are `*.exe` (`windows_amd64` or `windows_arm64`); `chmod` is not
+needed. Replace `darwin_arm64` with `darwin_amd64`, `linux_arm64`,
+`linux_amd64`, `windows_amd64`, or `windows_arm64`. The last segment is the
+installer version with dots replaced by hyphens (`1.0.0` → `1-0-0`).
 
 The installer copies tagged `commands/` files into your Cursor configuration
-directory (default `~/.cursor/commands/`) and records ownership in a manifest
-so later updates and uninstalls do not touch your own files.
+directory (default `~/.cursor/commands/` on macOS and Linux,
+`%USERPROFILE%\.cursor\commands` on Windows) and records ownership in a
+manifest so later updates and uninstalls do not touch your own files.
 
 You can still copy files by hand if you prefer:
 
@@ -86,13 +88,16 @@ mkdir -p ~/.cursor/commands
 cp /path/to/cursor-utils/commands/*.md ~/.cursor/commands/
 ```
 
-The repository does not need to live under `~/.cursor/`.
+On Windows, copy the `.md` files into `%USERPROFILE%\.cursor\commands`. The
+repository does not need to live under the Cursor directory.
 
 | Role | Path |
 | --- | --- |
 | Source | `cursor-utils/commands/*.md` |
 | Installed | `~/.cursor/commands/*.md` |
 | Installer manifest | `~/.cursor/.cursor-utils/manifest.json` |
+
+On Windows, replace `~/.cursor` with `%USERPROFILE%\.cursor`.
 
 ## Cursor compatibility
 
@@ -125,8 +130,9 @@ Command behavior is defined by the corresponding Markdown file under
 
 ## Updating
 
-Use the installer and select a newer content version. It updates only files
-listed in its manifest.
+Use the installer and select a newer content version. It writes the files you
+select from that version. Files it does not own are left unchanged unless you
+choose to overwrite them.
 
 To update by hand, copy the updated `commands/*.md` files into
 `~/.cursor/commands/` again, overwriting the previous copies if desired.
