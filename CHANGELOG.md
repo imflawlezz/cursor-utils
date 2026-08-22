@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [installer-1.1.0] — 2026-08-22
+
+### Added
+
+- Windows installer builds (`amd64`, `arm64`).
+
 ## [installer-1.0.0] — 2026-08-21
 
 ### Added
@@ -37,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `/docs` — maintain technical documentation based on the current project
   - `/docs-review` — audit project documentation against the implementation
 
-[Unreleased]: https://github.com/imflawlezz/cursor-utils/compare/installer-v1.0.0...HEAD
+[Unreleased]: https://github.com/imflawlezz/cursor-utils/compare/installer-v1.1.0...HEAD
+[installer-1.1.0]: https://github.com/imflawlezz/cursor-utils/releases/tag/installer-v1.1.0
 [installer-1.0.0]: https://github.com/imflawlezz/cursor-utils/releases/tag/installer-v1.0.0
 [0.1.0]: https://github.com/imflawlezz/cursor-utils/releases/tag/v0.1.0
