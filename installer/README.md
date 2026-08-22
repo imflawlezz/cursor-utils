@@ -18,12 +18,12 @@ Requires [Go](https://go.dev/) 1.25. `CGO_ENABLED=0`. From this directory:
 | `make tidy` | `go mod tidy` |
 | `make clean` | remove `dist/` |
 
-Version comes from `VERSION` (default `1.0.0`) via ldflags. Dots in the
-filename become hyphens (`1.0.0` → `1-0-0`).
+Version comes from `VERSION` (default `1.1.0`) via ldflags. Dots in the
+filename become hyphens (`1.1.0` → `1-1-0`).
 
 ```bash
 make build
-./dist/cursor_utils_installer_$(go env GOOS)_$(go env GOARCH)_1-0-0$(go env GOEXE)
+./dist/cursor_utils_installer_$(go env GOOS)_$(go env GOARCH)_1-1-0$(go env GOEXE)
 ```
 
 Live GitHub test (optional):
@@ -43,7 +43,7 @@ Subcommands are the same regardless of the binary filename:
 ```
 
 ```bash
-./cursor_utils_installer_darwin_arm64_1-0-0 version
+./cursor_utils_installer_darwin_arm64_1-1-0 version
 ```
 
 `version` also accepts `--version` and `-v`. `help` also accepts `--help` and `-h`.

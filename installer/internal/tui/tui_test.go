@@ -32,8 +32,8 @@ func TestSystemScreen(t *testing.T) {
 	if !strings.Contains(view, "cursor-utils installer") || !strings.Contains(view, "imflawlezz") {
 		t.Fatal(view)
 	}
-	if !strings.Contains(view, "1.0.0") {
-		t.Fatal("expected installer version 1.0.0")
+	if !strings.Contains(view, "1.1.0") {
+		t.Fatal("expected installer version 1.1.0")
 	}
 	if !strings.Contains(view, "https://github.com/imflawlezz") {
 		t.Fatal("expected github profile hyperlink")

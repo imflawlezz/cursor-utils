@@ -3,7 +3,7 @@ package config
 import "path/filepath"
 
 // Version is set at release via ldflags.
-var Version = "1.0.0"
+var Version = "1.1.0"
 
 const (
 	AppName = "cursor-utils"

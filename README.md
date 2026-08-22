@@ -67,14 +67,14 @@ Download the binary for your OS and architecture from the latest
 Release, then run it in a terminal:
 
 ```bash
-chmod +x cursor_utils_installer_darwin_arm64_1-0-0
-./cursor_utils_installer_darwin_arm64_1-0-0
+chmod +x cursor_utils_installer_darwin_arm64_1-1-0
+./cursor_utils_installer_darwin_arm64_1-1-0
 ```
 
 Windows builds are `*.exe` (`windows_amd64` or `windows_arm64`); `chmod` is not
 needed. Replace `darwin_arm64` with `darwin_amd64`, `linux_arm64`,
 `linux_amd64`, `windows_amd64`, or `windows_arm64`. The last segment is the
-installer version with dots replaced by hyphens (`1.0.0` → `1-0-0`).
+installer version with dots replaced by hyphens (`1.1.0` → `1-1-0`).
 
 The installer copies tagged `commands/` files into your Cursor configuration
 directory (default `~/.cursor/commands/` on macOS and Linux,
