@@ -1,5 +1,19 @@
 # clean-arch
 
+## Scope
+
+May modify only source, tests, and module structure required for the smallest
+coherent architectural fix that preserves behavior.
+
+Must not modify:
+- `README.md` (`/readme`)
+- `CHANGELOG.md` (`/changelog`)
+- files under `docs/` or ADRs (`/docs`)
+- comments unrelated to the architectural change (`/cleanup`)
+
+If an intentional exception should be recorded in documentation, report it and
+recommend `/docs`. Do not write the ADR or README yourself.
+
 1. Review the project's current architecture before making any changes.
 
 2. Do not assume that the project follows a textbook Clean Architecture

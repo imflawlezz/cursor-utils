@@ -1,5 +1,12 @@
 # commit
 
+## Scope
+
+Do not modify any files and do not run `git add` or `git commit`.
+
+Propose git commands only. Do not write changelog, README, or `docs/` as part
+of this command (`/changelog`, `/readme`, `/docs`).
+
 1. Review the current uncommitted changes, including both staged and unstaged changes.
 
 2. Split changes into logically atomic commits.

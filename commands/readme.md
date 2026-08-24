@@ -1,5 +1,21 @@
 # readme
 
+## Scope
+
+May create or update only:
+- the repository's primary `README.md`
+
+Must not modify:
+- `CHANGELOG.md` (`/changelog`, `/release`)
+- files under `docs/` (`/docs`)
+- `LICENSE`
+- source code, tests, configuration, or build files
+- Cursor command, rule, skill, agent, or hook files
+
+You may read those files as context. If detailed documentation belongs in
+`docs/`, put a short link in the README and recommend `/docs`; do not create
+or edit `docs/` files.
+
 1. Review the entire project before writing or updating `README.md`.
 
 2. Inspect relevant source code, project configuration, package manifests,
@@ -79,7 +95,8 @@
 17. If information required for a README section cannot be established from
     the repository, omit the section rather than inventing content.
 
-18. Update `README.md` directly.
+18. Update only `README.md` directly.
 
 19. After updating the README, briefly summarize the sections added, changed,
-    removed, and any information that could not be verified.
+    removed, any information that could not be verified, and any follow-up
+    recommended for `/docs` or `/changelog`.

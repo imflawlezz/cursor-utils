@@ -1,11 +1,30 @@
 # docs
 
-Maintain the project's technical documentation based on the current
+Maintain technical documentation in `docs/` based on the current
 implementation, existing documentation, and established project conventions.
 
 The goal is accurate, useful, maintainable documentation written in the style
 of an experienced software engineer. Do not generate documentation merely to
 increase the amount of documentation in the repository.
+
+## Scope
+
+May create, update, or remove only:
+- files under `docs/`
+- Architecture Decision Records in the project's established ADR location
+  (typically `docs/decisions/` or equivalent)
+- other technical documentation trees the project already uses for the same
+  purpose as `docs/` (guides, reference, architecture)
+
+Must not modify:
+- `README.md` or other README files (`/readme`)
+- `CHANGELOG.md` (`/changelog`, `/release`)
+- `LICENSE`
+- source code, tests, configuration, or build files
+- Cursor command, rule, skill, agent, or hook files
+
+You may read those files as context. If they need changes, report a handoff
+to the owning command instead of editing them.
 
 1. Understand the project before changing documentation.
 
@@ -17,14 +36,13 @@ increase the amount of documentation in the repository.
    - scripts and development tooling
    - tests
    - configuration files
-   - existing README files
    - existing `docs/` content
    - architecture documentation
    - ADRs or decision records
    - API specifications
    - generated documentation configuration
-   - contribution guidelines
    - project-specific documentation conventions
+   - `README.md` and `CHANGELOG.md` as read-only context only
 
    Treat the implementation and configuration as the primary source of truth.
    Treat existing documentation as authoritative only when it is consistent
@@ -100,29 +118,24 @@ increase the amount of documentation in the repository.
 
    Use only the directories that provide real value.
 
-   A small project may need only:
-   - `README.md`
-   - `CHANGELOG.md`
-   - one or two files under `docs/`
+   A small project may need no `docs/` tree at all if `README.md` and
+   `CHANGELOG.md` are sufficient. In that case, make no documentation files
+   and do not edit README or CHANGELOG.
 
-   A larger project may benefit from a more structured documentation tree.
+   A larger project may benefit from a more structured documentation tree
+   under `docs/`.
 
 6. Keep README and technical documentation separate.
 
-   `README.md` should primarily answer:
-   - What is this?
-   - Why does it exist?
-   - What does it do?
-   - How do I install it?
-   - How do I get started?
-   - Where can I find more detailed information?
+   `README.md` is owned by `/readme`. Do not edit it.
 
    Detailed architecture, API reference, design explanations, development
-   procedures, and extensive technical reference should generally live in
-   `docs/` when they would make the README unnecessarily long.
+   procedures, and extensive technical reference belong in `docs/` when they
+   would make the README unnecessarily long.
 
    Do not duplicate large sections of documentation between README and `docs/`.
-   Prefer concise links from the README to detailed documentation.
+   If the README needs a short link to new `docs/` pages, report that as a
+   follow-up for `/readme`. Do not add the link yourself.
 
 7. Keep architecture documentation separate from decision records.
 
@@ -259,9 +272,9 @@ increase the amount of documentation in the repository.
     Avoid documenting implementation details that are likely to change
     frequently unless those details are themselves relevant to developers.
 
-15. Keep documentation internally consistent.
+15. Keep in-scope documentation internally consistent.
 
-    When updating a concept, check related documentation for:
+    When updating a concept, check related files under `docs/` for:
     - outdated terminology
     - contradictory behavior
     - obsolete commands
@@ -270,15 +283,19 @@ increase the amount of documentation in the repository.
     - outdated architecture descriptions
     - stale examples
 
-    Update related documentation when necessary rather than leaving conflicting
-    sources of truth.
+    Update related `docs/` files when necessary rather than leaving conflicting
+    sources of truth inside `docs/`.
 
-16. Do not modify unrelated documentation.
+    If `README.md` or `CHANGELOG.md` conflict with the implementation, note the
+    conflict in the summary and recommend `/readme` or `/changelog`. Do not
+    edit those files.
 
-    Limit changes to documentation that is:
+16. Do not modify out-of-scope files.
+
+    Limit changes to `docs/` (and equivalent in-scope technical docs) that are:
     - directly relevant to the current task
     - demonstrably outdated
-    - necessary to keep cross-references consistent
+    - necessary to keep in-scope cross-references consistent
 
 17. Preserve existing project conventions.
 
@@ -319,7 +336,7 @@ increase the amount of documentation in the repository.
 
 20. If the documentation is already accurate and complete, make no changes.
 
-21. Modify the appropriate documentation files directly.
+21. Modify only in-scope documentation files directly.
 
 22. After completing the task, provide a concise summary containing:
     - documentation files created
@@ -328,3 +345,4 @@ increase the amount of documentation in the repository.
     - the documentation type used for each new document
     - important inconsistencies that were corrected
     - anything that could not be verified from the repository
+    - recommended follow-up commands for out-of-scope files, if any

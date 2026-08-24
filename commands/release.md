@@ -1,5 +1,20 @@
 # release
 
+## Scope
+
+May update only:
+- `CHANGELOG.md`: replace `[Unreleased]` with a dated version section and
+  update version reference links at the bottom of that file
+
+Must not:
+- rewrite historical changelog entries
+- modify `README.md`, `docs/`, `LICENSE`, source, or configuration
+- create a Git tag, GitHub release, commit, or push
+- bump version numbers in package manifests or other files
+
+If other files need a version bump, report that as a follow-up. Do not edit
+them.
+
 1. Read the current `CHANGELOG.md` and inspect the `[Unreleased]` section.
 
 2. Determine the appropriate Semantic Versioning bump based on the documented

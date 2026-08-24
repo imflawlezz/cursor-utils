@@ -1,5 +1,18 @@
 # cleanup
 
+## Scope
+
+May modify only comments and documentation comments in source files (and
+tests) that are in the requested set or in the current project changes.
+
+Must not:
+- change program behavior, APIs, architecture, naming, or unrelated formatting
+- rewrite `README.md`, `CHANGELOG.md`, `docs/`, or other project Markdown
+- create or update ADRs
+- execute git commits
+
+If Markdown documentation needs work, recommend `/readme` or `/docs`.
+
 1. Review the requested files or the current project changes.
 
 2. Clean up comments and documentation comments without changing program

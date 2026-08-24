@@ -1,5 +1,14 @@
 # changelog-draft
 
+## Scope
+
+Do not modify any files.
+
+Output only a proposed `[Unreleased]` section for `CHANGELOG.md`.
+
+Do not draft README, `docs/`, release notes outside the changelog, git tags,
+or version numbers.
+
 1. Determine the latest release tag in Git.
    - Prefer the latest reachable semantic-version tag matching `vX.Y.Z`.
    - Use that tag as the baseline.

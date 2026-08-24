@@ -1,5 +1,12 @@
 # changelog-review
 
+## Scope
+
+Review only `CHANGELOG.md`. Do not modify any files.
+
+Do not audit `README.md` (`/readme-review`) or `docs/` (`/docs-review`) except
+as brief handoffs when a changelog claim depends on them.
+
 1. Review the current `CHANGELOG.md` against:
    - Keep a Changelog 1.1.0
    - Semantic Versioning

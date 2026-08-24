@@ -1,5 +1,17 @@
 # readme-review
 
+## Scope
+
+Review only `README.md`. Do not modify any files.
+
+Do not audit as primary targets:
+- `CHANGELOG.md` (`/changelog-review`)
+- files under `docs/` (`/docs-review`)
+- source comments (`/cleanup`)
+- code architecture (`/clean-arch`)
+
+If those files have problems, report a brief handoff to the owning command.
+
 1. Review `README.md` against the current project implementation.
 
 2. Verify, where possible:

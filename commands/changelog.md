@@ -1,5 +1,21 @@
 # changelog
 
+## Scope
+
+May update only:
+- `CHANGELOG.md`, and only the `[Unreleased]` section plus creating that
+  section if it is missing
+
+Must not modify:
+- released changelog version entries
+- changelog reference links except as needed to keep `[Unreleased]` valid
+- `README.md` (`/readme`)
+- files under `docs/` (`/docs`)
+- `LICENSE`
+- source code, tests, tags, GitHub releases, or git history
+
+Do not invent a version number or release date. That is responsibility of the `/release` command.
+
 1. Determine the latest release tag in Git.
    - Prefer the latest reachable semantic-version tag matching `vX.Y.Z`.
    - Treat this tag as the baseline for the changelog update.
