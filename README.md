@@ -21,34 +21,36 @@ Invoke installed commands through Cursor's `/` command interface.
 ### Changelog
 
 - `/changelog` — Update only the `[Unreleased]` section of `CHANGELOG.md` from
-  changes since the latest SemVer tag, following Keep a Changelog.
+  changes since the latest SemVer tag, following Keep a Changelog. Does not
+  edit README or `docs/`.
 - `/changelog-draft` — Propose an `[Unreleased]` section without modifying
   files.
 - `/changelog-review` — Audit `CHANGELOG.md` for Keep a Changelog, SemVer, and
   consistency issues; report findings only.
 - `/release` — Turn `[Unreleased]` into a dated SemVer version section and
-  update reference links; does not create tags, GitHub releases, commits, or
-  pushes.
+  update changelog reference links; does not create tags, GitHub releases,
+  commits, or pushes, and does not bump versions in other files.
 
 ### Code quality
 
-- `/cleanup` — Remove or rewrite low-value comments (including AI-style
-  narration) without changing program behavior.
+- `/cleanup` — Remove or rewrite low-value comments in source without changing
+  program behavior or rewriting project Markdown.
 
 ### Architecture
 
 - `/clean-arch` — Review architectural boundaries against the project's actual
   structure and apply the smallest coherent refactor when a fix is warranted.
+  Does not rewrite README, changelog, or `docs/`.
 
 ### Documentation
 
-- `/readme` — Create or update `README.md` from the current project state.
+- `/readme` — Create or update only `README.md` from the current project state.
 - `/readme-review` — Audit `README.md` against the implementation; report
   findings only.
-- `/docs` — Maintain technical documentation from the current implementation
-  and project conventions.
-- `/docs-review` — Audit project documentation against the implementation;
-  report findings only.
+- `/docs` — Maintain technical documentation under `docs/` (and equivalent
+  trees). Does not edit `README.md` or `CHANGELOG.md`.
+- `/docs-review` — Audit `docs/` against the implementation; report findings
+  only.
 
 ## Requirements
 
@@ -165,8 +167,11 @@ the slash command name.
 When adding or changing a command:
 
 1. Keep the prompt factual and specific to the intended workflow.
-2. Do not claim behavior the command does not implement.
-3. Update `CHANGELOG.md` under `[Unreleased]`.
+2. State a **Scope** of files the command may modify or review, and files it
+   must not touch. Recommend a handoff to the owning command instead of
+   overlapping.
+3. Do not claim behavior the command does not implement.
+4. Update `CHANGELOG.md` under `[Unreleased]`.
 
 ## Versioning
 

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-08-24
+
+### Changed
+
+- Command prompts now declare an exclusive **Scope**: `/docs` owns `docs/`
+  only; `/readme` owns `README.md`; `/changelog` and `/release` own
+  `CHANGELOG.md`. Each command must hand off instead of editing another
+  command's files.
+
 ## [installer-1.1.0] — 2026-08-22
 
 ### Added
@@ -43,7 +52,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `/docs` — maintain technical documentation based on the current project
   - `/docs-review` — audit project documentation against the implementation
 
-[Unreleased]: https://github.com/imflawlezz/cursor-utils/compare/installer-v1.1.0...HEAD
+[Unreleased]: https://github.com/imflawlezz/cursor-utils/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/imflawlezz/cursor-utils/releases/tag/v0.2.0
 [installer-1.1.0]: https://github.com/imflawlezz/cursor-utils/releases/tag/installer-v1.1.0
 [installer-1.0.0]: https://github.com/imflawlezz/cursor-utils/releases/tag/installer-v1.0.0
 [0.1.0]: https://github.com/imflawlezz/cursor-utils/releases/tag/v0.1.0
