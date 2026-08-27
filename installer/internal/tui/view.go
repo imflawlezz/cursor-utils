@@ -5,6 +5,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/charmbracelet/lipgloss"
+
 	"github.com/imflawlezz/cursor-utils/installer/internal/installer"
 )
 
@@ -12,56 +14,80 @@ func (m Model) View() string {
 	if m.quitting && m.screen != screenProgress {
 		return ""
 	}
-	var body string
+	return wrapFrame(m.screenBody(), m.helpLine(), m.version(), m.frameWidth(), m.height)
+}
+
+func (m Model) frameWidth() int {
+	w := m.width
+	if w <= 0 {
+		return 80
+	}
+	return w
+}
+
+func (m Model) contentWidth() int {
+	w := m.frameWidth() - 6
+	if w < 8 {
+		return 8
+	}
+	return w
+}
+
+func (m Model) helpLine() string {
+	return wrapFitted(helpBar(footerFor(m.screen)), max(8, m.frameWidth()-6))
+}
+
+func (m Model) version() string {
+	if m.engine != nil {
+		return m.engine.Config().Version
+	}
+	return "dev"
+}
+
+func (m Model) screenBody() string {
 	switch m.screen {
 	case screenUnsupported:
-		body = m.viewUnsupported()
+		return m.viewUnsupported()
 	case screenSystem:
-		body = m.viewSystem()
+		return m.viewSystem()
 	case screenPathInput:
-		body = m.viewPath()
+		return m.viewPath()
 	case screenLoading:
-		body = m.viewLoading()
+		return m.viewLoading()
 	case screenVersion:
-		body = m.viewVersion()
+		return m.viewVersion()
 	case screenVersionList:
-		body = m.viewVersionList()
+		return m.viewVersionList()
 	case screenManage:
-		body = m.viewManage()
+		return m.viewManage()
 	case screenConfirmRemove:
-		body = m.viewConfirmRemove()
+		return m.viewConfirmRemove()
 	case screenDecision:
-		body = m.viewDecision()
+		return m.viewDecision()
 	case screenProgress:
-		body = m.viewProgress()
+		return m.viewProgress()
 	case screenResult:
-		body = m.viewResult()
+		return m.viewResult()
 	case screenError:
-		body = m.viewError()
+		return m.viewError()
 	case screenKeys:
 		from := m.keysFrom
 		if from == screenKeys {
 			from = screenManage
 		}
-		body = viewKeyHelp(from)
+		return viewKeyHelp(from)
+	default:
+		return ""
 	}
-	help := helpBar(footerFor(m.screen))
-	w := m.width
-	if w <= 0 {
-		w = 80
-	}
-	header := headerLine(m.engine.Config().Version)
-	content := header + "\n\n" + body + "\n\n" + help
-	return bodyStyle.Width(w).Render(content)
 }
 
 func (m Model) viewUnsupported() string {
 	return errorStyle.Render(m.plat.DisplayName+" is not yet supported.") +
-		"\n\nThis installer currently supports macOS and Linux."
+		"\n\nThis installer currently supports macOS, Linux, and Windows."
 }
 
 func (m Model) viewSystem() string {
-	osLine := "  OS: " + m.plat.DisplayName
+	osLine := "OS: " + m.plat.DisplayName
 	dir := m.cursorRoot
 	if dir == "" {
 		dir = m.plat.DefaultDir
@@ -69,21 +95,23 @@ func (m Model) viewSystem() string {
 	if dir == "" {
 		dir = "could not be detected"
 	}
-	dirLine := "  Cursor directory: " + dir
 
+	cw := m.contentWidth()
 	var b strings.Builder
 	b.WriteString(labelStyle.Render("System") + "\n")
 	b.WriteString(osLine + "\n")
-	b.WriteString(dirLine + "\n\n")
+	b.WriteString("Cursor directory: " + dir + "\n\n")
 
 	if !m.plat.DefaultOK {
-		b.WriteString("The default Cursor configuration directory could not be\n")
-		b.WriteString("determined. Choose the directory manually.\n\n")
-		b.WriteString(options([]string{"Choose location", "Quit"}, m.sysCursor))
+		for _, line := range wrapWords("The default Cursor configuration directory could not be determined. Choose the directory manually.", cw) {
+			b.WriteString(line + "\n")
+		}
+		b.WriteString("\n")
+		b.WriteString(m.options([]string{"Choose location", "Quit"}, m.sysCursor))
 		return b.String()
 	}
 	b.WriteString("Is this correct?\n\n")
-	b.WriteString(options([]string{"Continue", "Choose another location"}, m.sysCursor))
+	b.WriteString(m.options([]string{"Continue", "Choose another location"}, m.sysCursor))
 	return b.String()
 }
 
@@ -94,7 +122,10 @@ func (m Model) viewPath() string {
 	b.WriteString(dimStyle.Render("This is usually ~/.cursor") + "\n\n")
 	b.WriteString(m.pathInput.View() + "\n")
 	if m.pathErr != "" {
-		b.WriteString("\n" + errorStyle.Render(m.pathErr) + "\n")
+		b.WriteString("\n")
+		for _, line := range wrapWords(m.pathErr, m.contentWidth()) {
+			b.WriteString(errorStyle.Render(line) + "\n")
+		}
 	}
 	return b.String()
 }
@@ -104,7 +135,7 @@ func (m Model) viewLoading() string {
 	if note == "" {
 		note = "Working…"
 	}
-	return note
+	return statusStyle.Render(note)
 }
 
 func (m Model) viewVersion() string {
@@ -116,12 +147,12 @@ func (m Model) viewVersion() string {
 	} else {
 		latest = "Latest (none found)"
 	}
-	items := []string{latest, "Specific version"}
-	b.WriteString(radio(items, m.versionCursor))
+	b.WriteString(m.radio([]string{latest, "Specific version"}, m.versionCursor))
 	return b.String()
 }
 
 func (m Model) viewVersionList() string {
+	cw := m.contentWidth()
 	var b strings.Builder
 	b.WriteString(labelStyle.Render("Select version") + "\n\n")
 	if len(m.tags) == 0 {
@@ -133,17 +164,21 @@ func (m Model) viewVersionList() string {
 	if end > len(m.tags) {
 		end = len(m.tags)
 	}
+	numW := len(fmt.Sprintf("%d", max(1, len(m.tags))))
 	for i := m.listOffset; i < end; i++ {
-		line := "    " + m.tags[i]
+		num := fmt.Sprintf("%*d. ", numW, i+1)
+		line := num + m.tags[i]
 		if i == m.listCursor {
-			line = selectedStyle.Render("  > " + m.tags[i])
+			b.WriteString(fillSelected(line, cw, false) + "\n")
+		} else {
+			b.WriteString(line + "\n")
 		}
-		b.WriteString(line + "\n")
 	}
 	return b.String()
 }
 
 func (m Model) viewManage() string {
+	cw := m.contentWidth()
 	var b strings.Builder
 	ver := m.selectedTag
 	if ver == "" && m.plan != nil {
@@ -151,11 +186,11 @@ func (m Model) viewManage() string {
 	}
 	b.WriteString("Content: " + ver + "\n")
 	if m.cursorRoot != "" {
-		b.WriteString(dimStyle.Render("Cursor directory: "+m.cursorRoot) + "\n")
+		b.WriteString("Cursor directory: " + compactPath(m.cursorRoot, m.plat.Home) + "\n")
 	}
-	b.WriteString("\n" + labelStyle.Render("Components") + "\n\n")
+	b.WriteString("\n" + labelStyle.Render("Components") + "\n")
 	if len(m.groups) == 0 {
-		b.WriteString(dimStyle.Render("  No components in this version.") + "\n\n")
+		b.WriteString(dimStyle.Render("(empty — no components in this version)") + "\n")
 	}
 
 	rows := m.manageRows()
@@ -168,44 +203,59 @@ func (m Model) viewManage() string {
 			if g.Expanded {
 				arrow = "▾"
 			}
-			mark := checkMark(g.allSelected(), g.anySelected() && !g.allSelected())
-			line := "  " + arrow + " " + mark + " " + g.displayName()
-			if cursor {
-				line = selectedStyle.Render(line)
-			}
-			b.WriteString(line + "\n")
-			status := fmt.Sprintf("        %d files  ·  %s", len(g.Files), groupInstallStatus(m.plan, g.ID, len(g.Files)))
-			b.WriteString(statusStyle.Render(status) + "\n")
+			mark := selectMark(g.allSelected(), g.anySelected() && !g.allSelected())
+			left := "  " + arrow + " " + mark + " " + g.displayName()
+			b.WriteString(m.suffixLine(left, "", cursor, false, cw) + "\n")
+			status := fmt.Sprintf("%d files  ·  %s", len(g.Files), groupInstallStatus(m.plan, g.ID, len(g.Files)))
+			b.WriteString(statusStyle.Render("      "+status) + "\n")
 		case rowFile:
 			g := m.groups[row.GroupIdx]
 			f := g.Files[row.FileIdx]
-			mark := checkMark(f.Selected, false)
 			status := fileInstallStatus(m.plan, f.RelPath)
-			line := "      " + mark + " " + fileLabel(f.RelPath)
-			if cursor {
-				line = selectedStyle.Render(line + "  " + status)
-			} else {
-				b.WriteString(line)
-				b.WriteString(statusStyle.Render("  "+status) + "\n")
-				continue
-			}
-			b.WriteString(line + "\n")
+			mark := selectMark(f.Selected, false)
+			left := "      " + mark + " " + fileLabel(f.RelPath)
+			b.WriteString(m.suffixLine(left, status, cursor, false, cw) + "\n")
 		case rowLabel:
 			b.WriteString("\n" + labelStyle.Render(row.Action) + "\n")
 		case rowSpacer:
 			b.WriteString("\n")
 		case rowAction:
-			line := "    " + row.Action
-			if cursor {
-				line = selectedStyle.Render("  > " + row.Action)
-			}
-			b.WriteString(line + "\n")
+			b.WriteString(optionLine(row.Action, cursor, row.Action == "Remove selected", cw) + "\n")
 		}
 	}
 	if m.manageErr != "" {
-		b.WriteString("\n" + errorStyle.Render(m.manageErr) + "\n")
+		b.WriteString("\n")
+		for _, line := range wrapWords(m.manageErr, cw) {
+			b.WriteString(errorStyle.Render(line) + "\n")
+		}
 	}
 	return b.String()
+}
+
+func (m Model) suffixLine(left, right string, cursor, destructive bool, width int) string {
+	if width < 8 {
+		width = 8
+	}
+	if right == "" {
+		if cursor {
+			return fillSelected(left, width, destructive)
+		}
+		return left
+	}
+	gap := "  "
+	leftW := width - lipgloss.Width(gap) - lipgloss.Width(right)
+	if leftW < 8 {
+		right = truncateEnd(right, max(6, width/3))
+		leftW = width - lipgloss.Width(gap) - lipgloss.Width(right)
+		if leftW < 4 {
+			leftW = 4
+		}
+	}
+	line := padRight(truncateEnd(left, leftW), leftW) + gap + right
+	if cursor {
+		return fillSelected(line, width, destructive)
+	}
+	return padRight(truncateEnd(left, leftW), leftW) + gap + dimStyle.Render(right)
 }
 
 func (m Model) viewConfirmRemove() string {
@@ -222,13 +272,13 @@ func (m Model) viewConfirmRemove() string {
 	b.WriteString(fmt.Sprintf("Remove %d cursor-utils files?\n\n", len(paths)))
 	b.WriteString(formatRemoveList(paths, 5))
 	b.WriteString("\n")
-	b.WriteString(optionsDanger([]string{"Remove", "Cancel"}, m.removeCursor, 0))
+	b.WriteString(m.optionsDanger([]string{"Remove", "Cancel"}, m.removeCursor, 0))
 	return b.String()
 }
 
-func formatRemoveList(paths []string, max int) string {
-	if max < 1 {
-		max = 5
+func formatRemoveList(paths []string, maxN int) string {
+	if maxN < 1 {
+		maxN = 5
 	}
 	type grp struct {
 		dir   string
@@ -249,12 +299,12 @@ func formatRemoveList(paths []string, max int) string {
 	shown := 0
 	var b strings.Builder
 	for _, g := range groups {
-		if shown >= max {
+		if shown >= maxN {
 			break
 		}
 		b.WriteString("  " + g.dir + "/\n")
 		for _, f := range g.files {
-			if shown >= max {
+			if shown >= maxN {
 				break
 			}
 			b.WriteString("    " + f + "\n")
@@ -287,7 +337,7 @@ func (m Model) viewDecision() string {
 	for _, o := range m.decisionOptions() {
 		labels = append(labels, o.label)
 	}
-	b.WriteString(options(labels, m.decCursor))
+	b.WriteString(m.options(labels, m.decCursor))
 	return b.String()
 }
 
@@ -300,14 +350,14 @@ func (m Model) viewProgress() string {
 		title += " " + m.resultVer
 	}
 	var b strings.Builder
-	b.WriteString(title + "\n\n")
+	b.WriteString(labelStyle.Render(title) + "\n\n")
 	if len(m.progress) == 0 {
-		b.WriteString(dimStyle.Render("  Working…") + "\n")
+		b.WriteString(dimStyle.Render("Working…") + "\n")
 		return b.String()
 	}
 	for _, line := range m.progress {
 		mark := "●"
-		style := selectedStyle
+		style := noticeStyle
 		switch line.Status {
 		case installer.EventDone:
 			mark = "✓"
@@ -320,7 +370,7 @@ func (m Model) viewProgress() string {
 			style = errorStyle
 		case installer.EventStarted:
 			mark = "●"
-			style = selectedStyle
+			style = noticeStyle
 		}
 		b.WriteString("  " + style.Render(mark+" "+line.Path) + "\n")
 	}
@@ -339,16 +389,15 @@ func (m Model) viewResult() string {
 		b.WriteString("Existing Cursor files were left unchanged.")
 	case resultRemove:
 		b.WriteString(successStyle.Render("Removal complete") + "\n\n")
-		b.WriteString(fmt.Sprintf("  Files removed: %d\n", m.filesDone))
+		b.WriteString(fmt.Sprintf("Files removed: %d\n", m.filesDone))
 	default:
 		b.WriteString(successStyle.Render("Installation complete") + "\n\n")
-		b.WriteString("  Version: " + m.resultVer + "\n")
+		b.WriteString("Version: " + m.resultVer + "\n")
 		if len(m.resultComps) > 0 {
-			b.WriteString("  Components: " + strings.Join(m.resultComps, ", ") + "\n")
+			b.WriteString("Components: " + strings.Join(m.resultComps, ", ") + "\n")
 		}
-		b.WriteString(fmt.Sprintf("  Files installed: %d\n", m.filesDone))
+		b.WriteString(fmt.Sprintf("Files installed: %d\n", m.filesDone))
 	}
-	b.WriteString("\nPress Enter to continue")
 	return b.String()
 }
 
@@ -356,31 +405,25 @@ func (m Model) viewError() string {
 	var b strings.Builder
 	b.WriteString(errorStyle.Render("Something went wrong") + "\n\n")
 	b.WriteString(friendly(m.err) + "\n\n")
-	b.WriteString(options([]string{"Retry", "Quit"}, m.decCursor))
+	b.WriteString(m.options([]string{"Retry", "Quit"}, m.decCursor))
 	return b.String()
 }
 
-func options(items []string, selected int) string {
-	return optionsDanger(items, selected, -1)
+func (m Model) options(items []string, selected int) string {
+	return m.optionsDanger(items, selected, -1)
 }
 
-func optionsDanger(items []string, selected, danger int) string {
+func (m Model) optionsDanger(items []string, selected, danger int) string {
+	cw := m.contentWidth()
 	var b strings.Builder
 	for i, item := range items {
-		if i == selected {
-			style := selectedStyle
-			if i == danger {
-				style = dangerSelectedStyle
-			}
-			b.WriteString(style.Render("  > "+item) + "\n")
-		} else {
-			b.WriteString("    " + item + "\n")
-		}
+		b.WriteString(optionLine(item, i == selected, i == danger, cw) + "\n")
 	}
 	return b.String()
 }
 
-func radio(items []string, selected int) string {
+func (m Model) radio(items []string, selected int) string {
+	cw := m.contentWidth()
 	var b strings.Builder
 	for i, item := range items {
 		mark := "○"
@@ -389,9 +432,19 @@ func radio(items []string, selected int) string {
 		}
 		line := "  " + mark + " " + item
 		if i == selected {
-			line = selectedStyle.Render(line)
+			line = fillSelected(line, cw, false)
 		}
 		b.WriteString(line + "\n")
 	}
 	return b.String()
+}
+
+func compactPath(p, home string) string {
+	if p == "" {
+		return p
+	}
+	if home != "" && (strings.HasPrefix(p, home+"/") || strings.HasPrefix(p, home+"\\")) {
+		return "~" + p[len(home):]
+	}
+	return p
 }

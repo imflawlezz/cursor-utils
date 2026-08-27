@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"regexp"
 	"strings"
 	"testing"
 
@@ -11,6 +12,16 @@ import (
 	"github.com/imflawlezz/cursor-utils/installer/internal/installer"
 	"github.com/imflawlezz/cursor-utils/installer/internal/platform"
 )
+
+var (
+	ansiRE = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+	osc8RE = regexp.MustCompile(`\x1b\]8;.*?(?:\x07|\x1b\\)`)
+)
+
+func stripANSI(s string) string {
+	s = osc8RE.ReplaceAllString(s, "")
+	return ansiRE.ReplaceAllString(s, "")
+}
 
 func testModel(plat platform.Info) Model {
 	return New(installer.New(config.Default(), nil, plat), plat)
@@ -32,11 +43,14 @@ func TestSystemScreen(t *testing.T) {
 	if !strings.Contains(view, "cursor-utils installer") || !strings.Contains(view, "imflawlezz") {
 		t.Fatal(view)
 	}
-	if !strings.Contains(view, "1.1.0") {
-		t.Fatal("expected installer version 1.1.0")
+	if !strings.Contains(view, "1.2.0") {
+		t.Fatal("expected installer version 1.2.0")
 	}
 	if !strings.Contains(view, "https://github.com/imflawlezz") {
 		t.Fatal("expected github profile hyperlink")
+	}
+	if !strings.Contains(view, "┌─") || !strings.Contains(stripANSI(view), "q  quit") {
+		t.Fatalf("expected framed chrome:\n%s", view)
 	}
 }
 
@@ -97,7 +111,7 @@ func TestManageShowsDiskStateAndOptions(t *testing.T) {
 	view := m.View()
 	for _, want := range []string{
 		"commit.md", "docs.md", "installed", "not installed",
-		"Actions", "Change directory", "Open Cursor folder", "Keybindings", "1/2 installed",
+		"Actions", "Change directory", "Open Cursor folder", "Keybindings", "Repair TUI", "1/2 installed",
 		"Install / Update selected", "Remove selected",
 	} {
 		if !strings.Contains(view, want) {
@@ -107,6 +121,20 @@ func TestManageShowsDiskStateAndOptions(t *testing.T) {
 	if strings.Contains(view, "Options") {
 		t.Fatal("Options header should be gone")
 	}
+	if strings.Contains(view, "[x]") || strings.Contains(view, "[ ]") {
+		t.Fatalf("checkbox marks should be gone:\n%s", view)
+	}
+	plain := stripANSI(view)
+	if !strings.Contains(plain, "✓") {
+		t.Fatal("selected files should show ✓")
+	}
+	if !strings.Contains(plain, "✓ commit.md") {
+		t.Fatalf("expected left-side checkbox before filename:\n%s", plain)
+	}
+	if strings.Contains(plain, "installed  ✓") || strings.Contains(plain, "installed ✓") {
+		t.Fatalf("checkbox should not be on the right:\n%s", plain)
+	}
+	assertActionGap(t, stripANSI(view))
 }
 
 func TestManageHidesApplyWhenNothingSelected(t *testing.T) {
@@ -227,13 +255,10 @@ func TestKeybindingsScreen(t *testing.T) {
 		t.Fatal("? should open keybindings")
 	}
 	view := got.View()
-	for _, want := range []string{"Keybindings", "Move up", "Move down", "Select / toggle", "Shift+Tab"} {
+	for _, want := range []string{"Keybindings", "Move", "List", "App", "Move up / down", "Toggle component / file", "Shift+Tab", "Ctrl+L"} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("missing %q in\n%s", want, view)
 		}
-	}
-	if strings.Contains(view, "Move up / down") {
-		t.Fatal("up and down should be separate rows")
 	}
 	if strings.Contains(view, "Also") {
 		t.Fatal("should not use an Also column")
@@ -254,7 +279,7 @@ func TestKeybindingsScreen(t *testing.T) {
 		t.Fatal("? should open keybindings from system")
 	}
 	view = got.View()
-	if strings.Contains(view, "Select / toggle") || strings.Contains(view, "Collapse / back") {
+	if strings.Contains(view, "Toggle component / file") || strings.Contains(view, "Collapse / back") {
 		t.Fatalf("system keys should not list manage-only bindings\n%s", view)
 	}
 	if !strings.Contains(view, "Confirm") {
@@ -297,5 +322,138 @@ func TestQuitKey(t *testing.T) {
 	_ = next
 	if cmd == nil {
 		t.Fatal("expected quit command")
+	}
+}
+
+func assertActionGap(t *testing.T, got string) {
+	t.Helper()
+	lines := strings.Split(got, "\n")
+	open := -1
+	change := -1
+	for i, line := range lines {
+		if strings.Contains(line, "Open Cursor folder") {
+			open = i
+		}
+		if strings.Contains(line, "Change version") {
+			change = i
+		}
+	}
+	if open < 0 || change < 0 {
+		t.Fatalf("missing Open Cursor folder / Change version:\n%s", got)
+	}
+	if change != open+2 {
+		t.Fatalf("Change version should sit one blank line under Open Cursor folder (open=%d change=%d):\n%s", open, change, got)
+	}
+	if strings.TrimSpace(strings.Trim(lines[open+1], " │")) != "" {
+		t.Fatalf("expected blank line after Open Cursor folder, got %q", lines[open+1])
+	}
+}
+
+func TestWrapFrameTitle(t *testing.T) {
+	raw := wrapFrame("body", "", "1.2.0", 64, 0)
+	if !strings.Contains(raw, "\x1b]8;;https://github.com/imflawlezz") {
+		t.Fatalf("author should be a GitHub hyperlink:\n%q", raw)
+	}
+	got := stripANSI(raw)
+	lines := strings.Split(got, "\n")
+	if len(lines) < 3 {
+		t.Fatalf("too few lines:\n%s", got)
+	}
+	top := lines[0]
+	if !strings.HasPrefix(top, "┌─") || !strings.HasSuffix(top, "┐") {
+		t.Fatalf("top border: %q", top)
+	}
+	if !strings.Contains(top, "cursor-utils installer") || !strings.Contains(top, "v1.2.0") {
+		t.Fatalf("title missing: %q", top)
+	}
+	if !strings.Contains(top, "by imflawlezz") {
+		t.Fatalf("author missing: %q", top)
+	}
+	x0, x1 := authorNameCells("1.2.0")
+	if got := string([]rune(top)[x0:x1]); got != "imflawlezz" {
+		t.Fatalf("author cells %d:%d = %q in %q", x0, x1, got, top)
+	}
+	if w := len([]rune(top)); w != 64 {
+		t.Fatalf("top width %d want 64: %q", w, top)
+	}
+}
+
+func TestWrapFrameFillsHeight(t *testing.T) {
+	got := stripANSI(wrapFrame("body", "", "1.2.0", 56, 12))
+	lines := strings.Split(got, "\n")
+	if len(lines) != 12 {
+		t.Fatalf("height %d want 12:\n%s", len(lines), got)
+	}
+}
+
+func TestHelpAnchoredAtBottom(t *testing.T) {
+	got := stripANSI(wrapFrame("body", "up/down  confirm", "1.2.0", 56, 16))
+	lines := strings.Split(got, "\n")
+	if len(lines) != 16 {
+		t.Fatalf("height %d want 16:\n%s", len(lines), got)
+	}
+	if !strings.Contains(lines[len(lines)-3], "up/down") {
+		t.Fatalf("help should sit above the bottom border:\n%s", got)
+	}
+}
+
+func TestClickAuthorOpensGitHub(t *testing.T) {
+	var opened string
+	m := testModel(platform.Info{
+		OS: "darwin", DisplayName: "macOS", Supported: true, DefaultOK: true,
+		Home: "/Users/ada", DefaultDir: "/Users/ada/.cursor",
+	})
+	m.width = 80
+	m.height = 24
+	m.openURL = func(u string) error {
+		opened = u
+		return nil
+	}
+	x0, x1 := authorNameCells(m.version())
+	if m.linkAt(x0, 0) != config.Default().AuthorURL() || m.linkAt(x1-1, 0) != config.Default().AuthorURL() {
+		t.Fatalf("linkAt author %d-%d", x0, x1)
+	}
+	if m.linkAt(x0-1, 0) != "" || m.linkAt(x1, 0) != "" {
+		t.Fatal("click outside author should miss")
+	}
+	m.Update(tea.MouseMsg{
+		X:      x0,
+		Y:      0,
+		Action: tea.MouseActionPress,
+		Button: tea.MouseButtonLeft,
+	})
+	if opened != config.Default().AuthorURL() {
+		t.Fatalf("opened %q", opened)
+	}
+}
+
+func TestRepairDisplayResetsResizeState(t *testing.T) {
+	m := testModel(platform.Info{
+		OS: "darwin", DisplayName: "macOS", Supported: true, DefaultOK: true,
+		Home: "/Users/ada",
+	})
+	m.width = 100
+	m.height = 36
+	m.haveSize = true
+	m.userSized = true
+	m.wantH = 36
+	m.wantW = 100
+	next, cmd := m.repairDisplay()
+	if next.userSized {
+		t.Fatal("repair should allow auto-fit again")
+	}
+	if next.wantH != 0 || next.wantW != 0 {
+		t.Fatalf("repair should forget last resize request, got %dx%d", next.wantW, next.wantH)
+	}
+	if cmd == nil {
+		t.Fatal("expected clear screen + size query")
+	}
+}
+
+func TestFillSelectedStaysOneLine(t *testing.T) {
+	line := fillSelected("  1. "+strings.Repeat("Long Name ", 12)+"  installed  ✓", 40, false)
+	plain := stripANSI(line)
+	if strings.Contains(plain, "\n") {
+		t.Fatalf("selected row wrapped:\n%q", plain)
 	}
 }

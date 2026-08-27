@@ -7,10 +7,51 @@ import (
 )
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	next, cmd := m.update(msg)
+	mm, ok := next.(Model)
+	if !ok {
+		return next, cmd
+	}
+	return mm, tea.Batch(cmd, mm.resizeIfNeeded())
+}
+
+func (m Model) update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
+		if m.haveSize {
+			echo := m.wantH > 0 && msg.Height == m.wantH &&
+				(m.wantW == 0 || msg.Width == m.wantW)
+			if !echo && (msg.Width != m.width || msg.Height != m.height) {
+				m.userSized = true
+			}
+		}
 		m.width = msg.Width
 		m.height = msg.Height
+		m.haveSize = true
+		m.pathInput.Width = max(20, m.contentWidth())
+		return m, nil
+	case sizePollMsg:
+		if m.quitting {
+			return m, nil
+		}
+		cmd := sizePollCmd()
+		w, h, ok := currentTermSize()
+		if !ok || (w == m.width && h == m.height) {
+			return m, cmd
+		}
+		next, c2 := m.update(tea.WindowSizeMsg{Width: w, Height: h})
+		return next, tea.Batch(cmd, c2)
+	case tea.MouseMsg:
+		if msg.Button != tea.MouseButtonLeft || msg.Action != tea.MouseActionPress {
+			return m, nil
+		}
+		if u := m.linkAt(msg.X, msg.Y); u != "" {
+			fn := m.openURL
+			if fn == nil {
+				fn = openURL
+			}
+			_ = fn(u)
+		}
 		return m, nil
 	case useSavedRootMsg:
 		return m.continueFromSystem()
@@ -23,6 +64,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.quitting = true
 			return m, tea.Quit
+		}
+		if key(msg) == "ctrl+l" && m.screen != screenPathInput && m.screen != screenProgress {
+			return m.repairDisplay()
 		}
 		if key(msg) == "?" && m.screen != screenPathInput && m.screen != screenProgress && m.screen != screenKeys {
 			return m.openKeys(), nil
@@ -324,6 +368,8 @@ func (m Model) updateManage(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m = m.moveManagePage(-1)
 	case "pgdown":
 		m = m.moveManagePage(1)
+	case "o":
+		return m.activateAction("Open Cursor folder")
 	case " ":
 		m.manageErr = ""
 		switch row.Kind {
@@ -370,6 +416,8 @@ func (m Model) activateAction(action string) (Model, tea.Cmd) {
 			return m, nil
 		}
 		return m, openFolderCmd(m.cursorRoot, m.plat.OS)
+	case "Repair TUI":
+		return m.repairDisplay()
 	case "Keybindings":
 		return m.openKeys(), nil
 	case "Quit":
@@ -599,6 +647,13 @@ func (m Model) updateError(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, tea.Quit
 	}
 	return m, nil
+}
+
+func (m Model) repairDisplay() (Model, tea.Cmd) {
+	m.userSized = false
+	m.wantH = 0
+	m.wantW = 0
+	return m, tea.Batch(tea.ClearScreen, tea.WindowSize())
 }
 
 func (m Model) openKeys() Model {

@@ -176,6 +176,12 @@ type Model struct {
 	load     loadKind
 	loadNote string
 
+	wantH     int
+	wantW     int
+	haveSize  bool
+	userSized bool
+	openURL   func(string) error
+
 	quitting bool
 }
 
@@ -212,9 +218,9 @@ func New(eng *installer.Engine, plat platform.Info) Model {
 
 func (m Model) Init() tea.Cmd {
 	if m.savedRoot {
-		return func() tea.Msg { return useSavedRootMsg{} }
+		return tea.Batch(sizePollCmd(), func() tea.Msg { return useSavedRootMsg{} })
 	}
-	return textinput.Blink
+	return tea.Batch(sizePollCmd(), textinput.Blink)
 }
 
 func fileLabel(rel string) string {

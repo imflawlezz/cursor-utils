@@ -18,12 +18,12 @@ Requires [Go](https://go.dev/) 1.25. `CGO_ENABLED=0`. From this directory:
 | `make tidy` | `go mod tidy` |
 | `make clean` | remove `dist/` |
 
-Version comes from `VERSION` (default `1.1.0`) via ldflags. Dots in the
-filename become hyphens (`1.1.0` → `1-1-0`).
+Version comes from `VERSION` (default `1.2.0`) via ldflags. Dots in the
+filename become hyphens (`1.2.0` → `1-2-0`).
 
 ```bash
 make build
-./dist/cursor_utils_installer_$(go env GOOS)_$(go env GOARCH)_1-1-0$(go env GOEXE)
+./dist/cursor_utils_installer_$(go env GOOS)_$(go env GOARCH)_1-2-0$(go env GOEXE)
 ```
 
 Live GitHub test (optional):
@@ -43,7 +43,7 @@ Subcommands are the same regardless of the binary filename:
 ```
 
 ```bash
-./cursor_utils_installer_darwin_arm64_1-1-0 version
+./cursor_utils_installer_darwin_arm64_1-2-0 version
 ```
 
 `version` also accepts `--version` and `-v`. `help` also accepts `--help` and `-h`.
@@ -73,7 +73,7 @@ internal/tui         Bubble Tea UI
 
 The engine writes installed files, backups, and the manifest. The TUI
 best-effort saves the chosen Cursor root to `~/.cursor-utils.json` (save
-errors are ignored). `?` in the TUI lists keys.
+errors are ignored). `?` lists keys. Ctrl+L repairs the display.
 
 ## Ownership
 

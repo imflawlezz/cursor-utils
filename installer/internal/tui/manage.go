@@ -82,14 +82,15 @@ func (m Model) manageRows() []manageRow {
 		for _, a := range []string{"Install / Update selected", "Remove selected"} {
 			rows = append(rows, manageRow{Kind: rowAction, Action: a, Section: secApply})
 		}
-		rows = append(rows, manageRow{Kind: rowSpacer})
 	}
-	for _, a := range []string{"Change version", "Change directory"} {
-		rows = append(rows, manageRow{Kind: rowAction, Action: a, Section: secSettings})
-	}
+	rows = append(rows, manageRow{Kind: rowAction, Action: "Open Cursor folder", Section: secApply})
 	rows = append(rows, manageRow{Kind: rowSpacer})
-	for _, a := range []string{"Open Cursor folder", "Keybindings", "Quit"} {
-		rows = append(rows, manageRow{Kind: rowAction, Action: a, Section: secApp})
+	for _, a := range []string{"Change version", "Change directory", "Repair TUI", "Keybindings", "Quit"} {
+		sec := secSettings
+		if a == "Keybindings" || a == "Quit" || a == "Repair TUI" {
+			sec = secApp
+		}
+		rows = append(rows, manageRow{Kind: rowAction, Action: a, Section: sec})
 	}
 	return rows
 }

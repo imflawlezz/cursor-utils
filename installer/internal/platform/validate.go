@@ -15,7 +15,6 @@ var componentDirNames = map[string]struct{}{
 	"hooks":    {},
 }
 
-// ValidateCursorRoot never creates directories.
 func ValidateCursorRoot(path string) error {
 	if path == "" {
 		return fmt.Errorf("path is empty")

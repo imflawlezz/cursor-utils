@@ -69,6 +69,7 @@ func run() int {
 	p := tea.NewProgram(
 		tui.New(eng, plat),
 		tea.WithAltScreen(),
+		tea.WithMouseCellMotion(),
 		tea.WithContext(ctx),
 	)
 	if _, err := p.Run(); err != nil {
