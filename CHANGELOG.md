@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [installer-1.2.0] — 2026-08-27
+
+### Added
+
+- Mouse support, terminal resize handling, and **Ctrl+L** / **Repair TUI** to
+  refresh a broken display in the installer.
+- GoReleaser release pipeline for `installer-v*` tags: `.tar.gz` / `.zip`
+  archives, `checksums.txt`, and release notes taken from `###` changelog
+  sections.
+
+### Changed
+
+- Reworked the installer TUI for clearer layout and navigation: left-side
+  selection marks, full-width selection highlighting, tighter footers, and a
+  sectioned keybindings screen (`?`).
+- Manage screen actions and shortcuts reorganized for faster day-to-day use.
+- Installer downloads are release archives (extract, then run `cursor-utils`)
+  rather than bare binaries.
+
 ## [0.2.0] — 2026-08-24
 
 ### Changed
@@ -52,7 +71,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `/docs` — maintain technical documentation based on the current project
   - `/docs-review` — audit project documentation against the implementation
 
-[Unreleased]: https://github.com/imflawlezz/cursor-utils/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/imflawlezz/cursor-utils/compare/installer-v1.2.0...HEAD
+[installer-1.2.0]: https://github.com/imflawlezz/cursor-utils/releases/tag/installer-v1.2.0
 [0.2.0]: https://github.com/imflawlezz/cursor-utils/releases/tag/v0.2.0
 [installer-1.1.0]: https://github.com/imflawlezz/cursor-utils/releases/tag/installer-v1.1.0
 [installer-1.0.0]: https://github.com/imflawlezz/cursor-utils/releases/tag/installer-v1.0.0
