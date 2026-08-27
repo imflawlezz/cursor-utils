@@ -64,20 +64,20 @@ The supported installer is a standalone TUI. It does not require Go, Git, or
 Node at runtime. To build from source, see
 [installer/README.md](installer/README.md).
 
-Download the binary for your OS and architecture from the latest
+Download a release archive for your OS and architecture from the latest
 [`installer-v*`](https://github.com/imflawlezz/cursor-utils/releases) GitHub
-Release, then run it in a terminal:
+Release, extract it, then run the binary:
 
 ```bash
-chmod +x cursor_utils_installer_darwin_arm64_1-1-0
-./cursor_utils_installer_darwin_arm64_1-1-0
+tar -xzf cursor-utils-installer_1.2.0_darwin_arm64.tar.gz
+chmod +x cursor-utils
+./cursor-utils
 ```
 
-Windows builds are `*.exe` (`windows_amd64` or `windows_arm64`); `chmod` is not
-needed. Replace `darwin_arm64` with `darwin_amd64`, `linux_arm64`,
-`linux_amd64`, `windows_amd64`, or `windows_arm64`. The last segment is the
-installer version with dots replaced by hyphens (`1.1.0` → `1-1-0`).
-
+Windows archives are `.zip` (`windows_amd64` or `windows_arm64`). Replace
+`darwin_arm64` with `darwin_amd64`, `linux_arm64`, `linux_amd64`,
+`windows_amd64`, or `windows_arm64`. Release assets are also listed in
+`checksums.txt` on the same GitHub Release.
 The installer copies tagged `commands/` files into your Cursor configuration
 directory (default `~/.cursor/commands/` on macOS and Linux,
 `%USERPROFILE%\.cursor\commands` on Windows) and records ownership in a
