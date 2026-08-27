@@ -20,7 +20,7 @@ builds:
     main: ./cmd/cursor-utils
     binary: cursor-utils
     ldflags:
-      - -s -w -X github.com/imflawlezz/cursor-utils/installer/internal/config.Version={{ trimprefix .Tag "installer-v" }}
+      - -s -w -X github.com/imflawlezz/cursor-utils/installer/internal/config.Version={{ .Version }}
 
 archives:
   - formats:
@@ -29,7 +29,7 @@ archives:
       - goos: windows
         formats:
           - zip
-    name_template: "{{ .ProjectName }}_{{ trimprefix .Tag \"installer-v\" }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     files:
       - LICENSE
       - README.md

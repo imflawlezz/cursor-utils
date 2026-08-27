@@ -56,6 +56,11 @@ The TUI lists `v*` tags only and downloads
 `https://github.com/imflawlezz/cursor-utils/archive/refs/tags/<tag>.tar.gz`.
 Do not tag an installer-only release as `v1.0.0`.
 
+Pushing `installer-v*` runs the release workflow. GoReleaser OSS cannot parse
+prefixed tags as semver, so CI builds with a stripped `v*` tag and publishes
+archives plus `checksums.txt` to the real `installer-v*` GitHub Release via
+`gh` (title = tag; notes from `###` sections in `CHANGELOG.md`).
+
 ## Layout
 
 ```text

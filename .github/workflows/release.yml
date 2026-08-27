@@ -18,13 +18,78 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.25.x"
+
+      - name: Compute GoReleaser semver tags
+        id: tags
+        run: |
+          current_full="${GITHUB_REF_NAME}"
+          case "${current_full}" in
+            installer-v*) ;;
+            *)
+              echo "expected installer-v* tag, got ${current_full}" >&2
+              exit 1
+              ;;
+          esac
+          current="v${current_full#installer-v}"
+          previous_full=$(git tag --list 'installer-v*' --sort=-version:refname \
+            | grep -vx "${current_full}" \
+            | head -n1 || true)
+          previous=""
+          if [ -n "${previous_full}" ]; then
+            previous="v${previous_full#installer-v}"
+          fi
+          {
+            echo "current=${current}"
+            echo "previous=${previous}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Assert clean working tree
+        run: git diff --exit-code HEAD
+      - name: Assert tag points at HEAD
+        run: |
+          tag_sha=$(git rev-parse "${GITHUB_REF_NAME}^{}")
+          head_sha=$(git rev-parse HEAD)
+          if [ "${tag_sha}" != "${head_sha}" ]; then
+            echo "tag ${GITHUB_REF_NAME} (${tag_sha}) does not point at HEAD (${head_sha})" >&2
+            exit 1
+          fi
+
       - name: Release notes from CHANGELOG.md
         run: sh scripts/release-notes.sh "${GITHUB_REF_NAME}" > "$RUNNER_TEMP/release-notes.md"
+
       - uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
           version: "~> v2"
           workdir: installer
-          args: release --clean --release-notes ${{ runner.temp }}/release-notes.md
+          args: release --clean --skip=validate --skip=publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GORELEASER_CURRENT_TAG: ${{ steps.tags.outputs.current }}
+          GORELEASER_PREVIOUS_TAG: ${{ steps.tags.outputs.previous }}
+
+      - name: Publish GitHub Release
+        working-directory: installer
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eu
+          notes="${RUNNER_TEMP}/release-notes.md"
+          tag="${GITHUB_REF_NAME}"
+          # Collect release assets (archives + checksums).
+          assets=$(find dist -maxdepth 1 \( -name '*.tar.gz' -o -name '*.zip' -o -name 'checksums.txt' \) | sort)
+          if [ -z "${assets}" ]; then
+            echo "no release assets found under installer/dist" >&2
+            exit 1
+          fi
+          if gh release view "${tag}" >/dev/null 2>&1; then
+            # Re-run / retry: replace notes and upload (clobber) assets.
+            gh release edit "${tag}" --title "${tag}" --notes-file "${notes}"
+            # shellcheck disable=SC2086
+            gh release upload "${tag}" ${assets} --clobber
+          else
+            # shellcheck disable=SC2086
+            gh release create "${tag}" ${assets} \
+              --title "${tag}" \
+              --notes-file "${notes}"
+          fi
