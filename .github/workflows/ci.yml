@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: installer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.x"
+      - name: Test
+        run: go test ./...
+      - name: Vet
+        run: go vet ./...
+      - name: Build
+        run: go build -o cursor-utils ./cmd/cursor-utils
+      - name: Check changelog release notes
+        if: runner.os != 'Windows'
+        working-directory: .
+        run: |
+          sh -n scripts/release-notes.sh
+          notes=$(sh scripts/release-notes.sh installer-v1.1.0)
+          printf '%s\n' "$notes" | grep -q '### Added'
+          ! printf '%s\n' "$notes" | grep -q '^## \['

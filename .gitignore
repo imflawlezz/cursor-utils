@@ -7,5 +7,6 @@
 *.log
 install.sh
 installer/dist/
+installer/LICENSE
 installer/cursor_utils_installer_*
 installer/cursor-utils
