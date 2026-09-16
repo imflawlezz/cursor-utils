@@ -17,6 +17,9 @@ Invoke installed commands through Cursor's `/` command interface.
 - `/commit` — Review staged and unstaged changes, propose atomic Conventional
   Commits with explicit `git add` / `git commit` commands, and do not execute
   them.
+- `/pr-draft` — Review the current branch against `main`, draft a PR title and
+  body from commits and diff, and propose `git push` / `gh pr create` commands
+  without executing them.
 
 ### Changelog
 
